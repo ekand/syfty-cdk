@@ -11,7 +11,7 @@ headers = {
 
 def lambda_handler(event, context):
     print(json.dumps(event))
-    email = event["queryStringParameters"]["email"]
+    email = parse_email(event["body"])
     if event["httpMethod"] == "OPTIONS":
         return {"statusCode": 200, "headers": headers}
     dynamodb = boto3.resource('dynamodb')
@@ -34,3 +34,8 @@ def lambda_handler(event, context):
         },
         'body': json.dumps({"email_saved": "yes"})
     }
+
+
+def parse_email(body):
+    index = body.find("=")
+    return body[index+1:].replace("%40", "@")

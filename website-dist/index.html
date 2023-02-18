@@ -39,11 +39,11 @@
 
         <p>Don't wait any longer - Sign up for Syfty today and start receiving notifications for the posts that matter
             to you!</p>
-        <form action="https://f5jbt6q5a4.execute-api.us-east-1.amazonaws.com/prod/email">
+
+        <form action="https://f5jbt6q5a4.execute-api.us-east-1.amazonaws.com/prod/email" method="post">
             <label for="email">Email:</label>
-            <input type="email" id="email" pattern=".+@.+\..+" size="30" required>
-            <label for="submit">Sign Up!</label>
-            <input type="submit" id="submit" value="Submit">
+            <input type="email" id="email" name="email" pattern=".+@.+\..+" size="30" value="me@email.com" required>
+            <button type="submit">Sign Up!</button>
         </form>
 
     </div>
