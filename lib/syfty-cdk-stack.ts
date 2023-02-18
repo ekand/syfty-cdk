@@ -9,6 +9,8 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import * as targets from "aws-cdk-lib/aws-route53-targets";
 
 import { Construct } from "constructs";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -39,11 +41,31 @@ export class SyftyCdkStack extends cdk.Stack {
       this,
       "SyftyLandingPageDistribution",
       {
-        defaultBehavior: { origin: new origins.S3Origin(assetsBucket) },
+        defaultBehavior: {
+          origin: new origins.S3Origin(assetsBucket),
+          viewerProtocolPolicy:
+            cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        },
         domainNames: ["syfty.link"],
         certificate,
       }
     );
+
+    const zone = route53.HostedZone.fromHostedZoneAttributes(
+      this,
+      "syftydotlink-zone",
+      {
+        zoneName: "syfty.link",
+        hostedZoneId: "Z04818373AY4HWJSPONYH",
+      }
+    );
+
+    new route53.ARecord(this, "CDNARecord", {
+      zone,
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(cf)),
+    });
+
+    cf.addBehavior("redirect-http-to-https");
 
     new cdk.CfnOutput(this, "SyftyDistributionID", {
       value: cf.distributionId,
