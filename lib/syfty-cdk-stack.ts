@@ -4,6 +4,12 @@ import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as apigateway from "aws-cdk-lib/aws-apigateway";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as apigw from "aws-cdk-lib/aws-apigateway";
+
 import { Construct } from "constructs";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
@@ -21,6 +27,7 @@ export class SyftyCdkStack extends cdk.Stack {
       destinationBucket: assetsBucket,
     });
 
+    // create a cloudfront distribution
     const cf = new cloudfront.Distribution(
       this,
       "SyftyLandingPageDistribution",
@@ -31,10 +38,73 @@ export class SyftyCdkStack extends cdk.Stack {
       }
     );
 
-    new cdk.CfnOutput(this, "distributionID", {
+    new cdk.CfnOutput(this, "SyftyDistributionID", {
       value: cf.distributionId,
       description: "The id of the distribution",
-      exportName: "distributionID",
+      exportName: "SyftyDistributionID",
+    });
+
+    new cdk.CfnOutput(this, "SyftyDistributionDomainName", {
+      value: cf.distributionDomainName,
+      description: "The domain name of the distribution",
+      exportName: "SyftyDistributionDomainName",
+    });
+
+    // Create a new DynamoDB table
+    const table = new dynamodb.Table(this, "SyftyEmailsTable", {
+      partitionKey: { name: "email", type: dynamodb.AttributeType.STRING },
+      tableName: "syfty-emails-table",
+    });
+
+    // Create a new IAM role with DynamoDB read permissions
+    const role = new iam.Role(this, "SyftyLambdaRole", {
+      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+    });
+    table.grantReadWriteData(role);
+    role.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: ["arn:aws:logs:*:*:*"],
+      })
+    );
+
+    // Create a new Lambda function
+    const signUpHandler = new lambda.Function(this, "signUpHandler", {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      code: lambda.Code.fromAsset("lambda"),
+      handler: "signup_handler.lambda_handler",
+      role: role,
+    });
+
+    // Create a new API Gateway REST API
+    const api = new apigateway.RestApi(this, "'SignUpEndpoint'", {
+      restApiName: "'SignUp Endpoint'",
+      description: "Saves Syfty Email Signups to a database",
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigw.Cors.ALL_ORIGINS,
+      },
+    });
+
+    // Create a new resource and method for the API Gateway
+    const visits = api.root.addResource("email");
+    const postintegration = new apigateway.LambdaIntegration(signUpHandler, {
+      requestTemplates: {
+        "application/json": '{ "email": "$input.params(\'email\')" }',
+      },
+      passthroughBehavior: apigw.PassthroughBehavior.WHEN_NO_TEMPLATES,
+      integrationResponses: [{ statusCode: "200" }],
+    });
+    visits.addMethod("POST", postintegration);
+
+    new cdk.CfnOutput(this, "SyftyEmailSignupAPIDomainName", {
+      value: api.url,
+      description: "The domain name of the email signup api",
+      exportName: "SyftyEmailSignupAPIDomainName",
     });
   }
 }
