@@ -65,8 +65,6 @@ export class SyftyCdkStack extends cdk.Stack {
       target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(cf)),
     });
 
-    cf.addBehavior("redirect-http-to-https");
-
     new cdk.CfnOutput(this, "SyftyDistributionID", {
       value: cf.distributionId,
       description: "The id of the distribution",
