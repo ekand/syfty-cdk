@@ -8,6 +8,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 
 import { Construct } from "constructs";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -26,14 +27,21 @@ export class SyftyCdkStack extends cdk.Stack {
       destinationBucket: assetsBucket,
     });
 
+    const certificate = acm.Certificate.fromCertificateArn(
+      this,
+      "Certificate",
+      // found using aws acm list-certificates --region us-east-1
+      "arn:aws:acm:us-east-1:212702451742:certificate/79877676-939f-4886-8409-2de106f55da9"
+    );
+
     // create a cloudfront distribution
     const cf = new cloudfront.Distribution(
       this,
       "SyftyLandingPageDistribution",
       {
         defaultBehavior: { origin: new origins.S3Origin(assetsBucket) },
-        // domainNames: ["syfty.net"],
-        // certificate,
+        domainNames: ["syfty.net"],
+        certificate,
       }
     );
 
