@@ -11,7 +11,7 @@ headers = {
 
 def lambda_handler(event, context):
     print(json.dumps(event))
-    email = parse_email(event["body"])
+    email = event["body"]
     if event["httpMethod"] == "OPTIONS":
         return {"statusCode": 200, "headers": headers}
     dynamodb = boto3.resource('dynamodb')
@@ -29,13 +29,8 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'headers': {
             'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Origin': 'https://erikresume.com',
+            'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
         },
         'body': json.dumps({"email_saved": "yes"})
     }
-
-
-def parse_email(body):
-    index = body.find("=")
-    return body[index+1:].replace("%40", "@")
