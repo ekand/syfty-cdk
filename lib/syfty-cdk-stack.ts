@@ -31,7 +31,7 @@ export class SyftyCdkStack extends cdk.Stack {
       this,
       "Certificate",
       // found using aws acm list-certificates --region us-east-1
-      "arn:aws:acm:us-east-1:212702451742:certificate/79877676-939f-4886-8409-2de106f55da9"
+      "arn:aws:acm:us-east-1:212702451742:certificate/bce47da2-4106-4a13-bff7-3e0d723eb861"
     );
 
     // create a cloudfront distribution
@@ -40,7 +40,7 @@ export class SyftyCdkStack extends cdk.Stack {
       "SyftyLandingPageDistribution",
       {
         defaultBehavior: { origin: new origins.S3Origin(assetsBucket) },
-        domainNames: ["syfty.net"],
+        domainNames: ["syfty.link"],
         certificate,
       }
     );
