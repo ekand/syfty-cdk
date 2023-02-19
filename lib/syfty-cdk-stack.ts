@@ -11,7 +11,8 @@ import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
-
+import * as rds from "aws-cdk-lib/aws-rds";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
@@ -133,5 +134,53 @@ export class SyftyCdkStack extends cdk.Stack {
       description: "The domain name of the email signup api",
       exportName: "SyftyEmailSignupAPIDomainName",
     });
+
+    // // Create an RDS instance for Syfty core
+
+    // // Define the VPC for the RDS database
+    // const vpc = new ec2.Vpc(this, "MyVPC", {
+    //   ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
+    //   maxAzs: 2,
+    // });
+
+    // // Define the Security Group for the RDS database
+    // const dbSecurityGroup = new ec2.SecurityGroup(this, "DBSecurityGroup", {
+    //   vpc,
+    //   allowAllOutbound: true,
+    //   description: "Security group for the RDS database",
+    // });
+
+    // dbSecurityGroup.addIngressRule(
+    //   ec2.Peer.ipv4("104.153.230.42/32"),
+    //   ec2.Port.tcp(3306),
+    //   "allow postgres access"
+    // );
+
+    // // Define the RDS database
+    // const database = new rds.DatabaseInstance(this, "MyDatabase", {
+    //   engine: rds.DatabaseInstanceEngine.mysql({
+    //     version: rds.MysqlEngineVersion.VER_8_0,
+    //   }),
+    //   instanceType: ec2.InstanceType.of(
+    //     ec2.InstanceClass.BURSTABLE2,
+    //     ec2.InstanceSize.MICRO
+    //   ),
+    //   vpc,
+    //   securityGroups: [dbSecurityGroup],
+    //   credentials: rds.Credentials.fromPassword(
+    //     "username",
+    //     cdk.SecretValue.unsafePlainText("password")
+    //   ),
+    //   allocatedStorage: 10,
+    //   publiclyAccessible: true,
+    // });
+
+    // // Output the database endpoint and port for testing purposes
+    // new cdk.CfnOutput(this, "RDSDatabaseEndpoint", {
+    //   value: database.dbInstanceEndpointAddress,
+    // });
+    // new cdk.CfnOutput(this, "RDSDatabasePort", {
+    //   value: database.dbInstanceEndpointPort,
+    // });
   }
 }
