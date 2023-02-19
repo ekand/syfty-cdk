@@ -1,2 +1,4 @@
 venv/
 praw.ini
+db_creds.py
+__pycache__/
