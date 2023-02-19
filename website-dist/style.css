@@ -42,6 +42,9 @@ body {
     background-color: #16a085;
   }
   
+  .psuedofooter {
+    text-align: center
+  }
 
   form {
     display: flex;
