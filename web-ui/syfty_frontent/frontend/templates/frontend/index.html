@@ -1,0 +1,9 @@
+{% if latest_search_list %}
+<ul>
+    {% for search in latest_search_list %}
+    <li><a href="{% url 'frontend:detail' search.id %}">{{ search.subreddit }}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No Searches are available.</p>
+{% endif %}
